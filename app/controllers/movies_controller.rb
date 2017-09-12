@@ -11,20 +11,49 @@ class MoviesController < ApplicationController
   end
 
   def index
+    
+    new_ratings = false
+    new_sorts = false
+    
     @all_ratings = Movie.get_all_ratings
     @selected_ratings = params[:ratings]
-    
     if @selected_ratings != nil
+      session[:ratings] = @selected_ratings
       @selected_ratings = @selected_ratings.keys
+    elsif session[:ratings] != nil
+      @selected_ratings = session[:ratings]
+      new_ratings = true
     else
       @selected_ratings = @all_ratings
     end
     
-    if params[:sort] == 'title'
+    @sort = params[:sort]
+    if @sort != nil
+      session[:sort] = @sort
+    elsif session[:sort] != nil
+      @sort = session[:sort]
+      new_sort = true
+    else
+      @sort = ''
+    end
+    
+    if new_ratings || new_sort
+      session.clear
+      flash.keep
+      if new_ratings && new_sort
+        redirect_to movies_path(ratings: @selected_ratings, sort: @sort)
+      elsif new_ratings
+        redirect_to movies_path(ratings: @selected_ratings, sort: params[:sort])
+      else
+        redirect_to movies_path(sort: @sort, ratings: params[:ratings])
+      end
+    end
+    
+    if @sort == 'title'
       @movies = Movie.where({ rating: @selected_ratings }).order(:title)
       @hilite_title = 'hilite'
       @hilite_date = ''
-    elsif params[:sort] == 'release_date'
+    elsif @sort == 'release_date'
       @movies = Movie.where({ rating: @selected_ratings }).order(:release_date)
       @hilite_title = ''
       @hilite_date = 'hilite'
