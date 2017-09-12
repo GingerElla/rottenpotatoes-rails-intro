@@ -13,7 +13,7 @@ class MoviesController < ApplicationController
   def index
     
     new_ratings = false
-    new_sorts = false
+    new_sort = false
     
     @all_ratings = Movie.get_all_ratings
     @selected_ratings = params[:ratings]
